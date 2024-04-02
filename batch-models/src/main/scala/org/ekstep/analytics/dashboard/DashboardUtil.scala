@@ -148,7 +148,6 @@ case class DashboardConfig (
    mlReportPath: String,
    surveyQuestionReportColumnsConfig: String,
    surveyStatusReportColumnsConfig: String,
-   includeExpiredSolutionIDs: Boolean,
 
 
    prefixDirectoryPath: String,
@@ -196,8 +195,6 @@ object DashboardConfigParser extends Serializable {
       sparkElasticsearchConnectionHost = getConfigModelParam(config, "sparkElasticsearchConnectionHost"),
       sparkMongoConnectionHost =  getConfigModelParam(config, "sparkMongoConnectionHost"),
       fracBackendHost = getConfigModelParam(config, "fracBackendHost"),
-      mlSparkDruidRouterHost = getConfigModelParam(config, "mlSparkDruidRouterHost"),
-      mlSparkMongoConnectionHost = getConfigModelParam(config, "mlSparkMongoConnectionHost"),
       // kafka topics
       roleUserCountTopic = getConfigSideTopic(config, "roleUserCount"),
       orgRoleUserCountTopic = getConfigSideTopic(config, "orgRoleUserCount"),
@@ -311,7 +308,6 @@ object DashboardConfigParser extends Serializable {
       mlReportPath = getConfigModelParam(config, "mlReportPath"),
       surveyQuestionReportColumnsConfig = getConfigModelParam(config, "surveyQuestionReportColumnsConfig"),
       surveyStatusReportColumnsConfig = getConfigModelParam(config, "surveyStatusReportColumnsConfig"),
-      includeExpiredSolutionIDs = getConfigModelParam(config, "includeExpiredSolutionIDs").toBoolean,
 
       // comms-console
       commsConsolePrarambhEmailSuffix = getConfigModelParam(config, "commsConsolePrarambhEmailSuffix", ".kb@karmayogi.in"),
