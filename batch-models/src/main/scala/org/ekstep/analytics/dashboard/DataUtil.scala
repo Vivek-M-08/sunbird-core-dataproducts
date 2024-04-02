@@ -8,12 +8,8 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.storage.StorageLevel
 import org.ekstep.analytics.framework.{FrameworkContext, StorageConfig}
 import DashboardUtil._
-import net.lingala.zip4j.ZipFile
-import net.lingala.zip4j.model.ZipParameters
-import net.lingala.zip4j.model.enums.{CompressionLevel, CompressionMethod}
-import org.apache.commons.io.FileUtils
 
-import java.io.{File, Serializable}
+import java.io.Serializable
 import java.util
 import scala.collection.mutable.ListBuffer
 
@@ -1679,7 +1675,7 @@ object DataUtil extends Serializable {
 
   def getSolutionIdData(columns: String, dataSource: String, solutionId: String)(implicit spark: SparkSession, conf: DashboardConfig): DataFrame = {
     val query = raw"""SELECT $columns FROM  \"$dataSource\" WHERE solutionId='$solutionId'"""
-    var df = druidDFOption(query, conf.mlSparkDruidRouterHost, limit = 1000000).orNull
+    var df = druidDFOption(query, conf.sparkDruidRouterHost, limit = 1000000).orNull
     if (df == null) return emptySchemaDataFrame(Schema.solutionIdDataSchema)
     if (df.columns.contains("evidences")) {
       df = df.withColumn("evidences", when(col("evidences").isNotNull && col("evidences") =!= "", concat(lit(conf.baseUrlForEvidences), col("evidences"))).otherwise(col("evidences")))
@@ -1700,38 +1696,38 @@ object DataUtil extends Serializable {
   }
 
   def loadAllUniqueSolutionIds(dataSource: String)(implicit spark: SparkSession, conf: DashboardConfig): DataFrame = {
-    val query = raw"""SELECT DISTINCT solutionId AS solutionIds, solutionName FROM \"$dataSource\" """
-    var df = druidDFOption(query, conf.mlSparkDruidRouterHost, limit = 1000000).orNull
+    val query = raw"""SELECT DISTINCT solutionId AS solutionIds FROM \"$dataSource\" """
+    var df = druidDFOption(query, conf.sparkDruidRouterHost, limit = 1000000).orNull
     if (df == null) return emptySchemaDataFrame(Schema.uniqueSolutionIdsDataSchema)
     df = df.dropDuplicates("solutionIds")
     df
   }
 
   def getSolutionsEndDate(solutionIdsDF: DataFrame)(implicit spark: SparkSession, conf: DashboardConfig): DataFrame = {
-    val completeUrl = s"mongodb://${conf.mlSparkMongoConnectionHost}:27017"
+    val completeUrl = s"mongodb://${conf.sparkMongoConnectionHost}:27017"
     val df = mongodbSolutionsTableAsDataFrame(completeUrl, conf.mlMongoDatabase, conf.surveyCollection, solutionIdsDF)
     if (df == null) return emptySchemaDataFrame(Schema.solutionsEndDateDataSchema)
     df
   }
 
-  def zipAndSyncReports(completePath: String, reportPath: String)(implicit spark: SparkSession, sc: SparkContext, fc: FrameworkContext, conf: DashboardConfig): Unit = {
-    val folder = new File(completePath)
-    val zipFilePath = completePath + ".zip"
-    val zipFile = new ZipFile(zipFilePath)
-    val parameters = new ZipParameters()
-    parameters.setCompressionMethod(CompressionMethod.DEFLATE)
-    parameters.setCompressionLevel(CompressionLevel.NORMAL)
-    /** Zip the folder */
-    zipFile.addFolder(folder, parameters)
-    /** Delete all files inside parent directory */
-    if (folder.isDirectory) FileUtils.cleanDirectory(folder)
-    /** Move the zip file inside the parent directory */
-    val zipFileName = new File(zipFilePath).getName()
-    val destinationFolderPath = completePath
-    val destinationZipFilePath = destinationFolderPath + File.separator + zipFileName
-    new File(zipFilePath).renameTo(new File(destinationZipFilePath))
-    /** Upload file to blob storage */
-    syncReports(completePath, reportPath)
-  }
+//  def zipAndSyncReports(completePath: String, reportPath: String)(implicit spark: SparkSession, sc: SparkContext, fc: FrameworkContext, conf: DashboardConfig): Unit = {
+//    val folder = new File(completePath)
+//    val zipFilePath = completePath + ".zip"
+//    val zipFile = new ZipFile(zipFilePath)
+//    val parameters = new ZipParameters()
+//    parameters.setCompressionMethod(CompressionMethod.DEFLATE)
+//    parameters.setCompressionLevel(CompressionLevel.NORMAL)
+//    /** Zip the folder */
+//    zipFile.addFolder(folder, parameters)
+//    /** Delete all files inside parent directory */
+//    if (folder.isDirectory) FileUtils.cleanDirectory(folder)
+//    /** Move the zip file inside the parent directory */
+//    val zipFileName = new File(zipFilePath).getName()
+//    val destinationFolderPath = completePath
+//    val destinationZipFilePath = destinationFolderPath + File.separator + zipFileName
+//    new File(zipFilePath).renameTo(new File(destinationZipFilePath))
+//    /** Upload file to blob storage */
+//    syncReports(completePath, reportPath)
+//  }
 
 }
