@@ -140,14 +140,14 @@ case class DashboardConfig (
    commsConsolePrarambhCbpIds: String,
 
     //ml report config
-   gracePeriod: String,
-   solutionIDs: String,
-   baseUrlForEvidences: String,
-   mlMongoDatabase: String,
-   surveyCollection: String,
-   mlReportPath: String,
-   surveyQuestionReportColumnsConfig: String,
-   surveyStatusReportColumnsConfig: String,
+//   gracePeriod: String,
+//   solutionIDs: String,
+//   baseUrlForEvidences: String,
+//   mlMongoDatabase: String,
+//   surveyCollection: String,
+//   mlReportPath: String,
+//   surveyQuestionReportColumnsConfig: String,
+//   surveyStatusReportColumnsConfig: String,
 
 
    prefixDirectoryPath: String,
@@ -300,14 +300,14 @@ object DashboardConfigParser extends Serializable {
       acbpMdoSummaryReportPath = getConfigModelParam(config, "acbpMdoSummaryReportPath"),
       kcmReportPath = getConfigModelParam(config, "kcmReportPath"),
       //ml report config
-      gracePeriod = getConfigModelParam(config, "gracePeriod"),
-      solutionIDs = getConfigModelParam(config, "solutionIDs"),
-      baseUrlForEvidences = getConfigModelParam(config, "baseUrlForEvidences"),
-      mlMongoDatabase = getConfigModelParam(config, "mlMongoDatabase"),
-      surveyCollection = getConfigModelParam(config, "surveyCollection"),
-      mlReportPath = getConfigModelParam(config, "mlReportPath"),
-      surveyQuestionReportColumnsConfig = getConfigModelParam(config, "surveyQuestionReportColumnsConfig"),
-      surveyStatusReportColumnsConfig = getConfigModelParam(config, "surveyStatusReportColumnsConfig"),
+//      gracePeriod = getConfigModelParam(config, "gracePeriod"),
+//      solutionIDs = getConfigModelParam(config, "solutionIDs"),
+//      baseUrlForEvidences = getConfigModelParam(config, "baseUrlForEvidences"),
+//      mlMongoDatabase = getConfigModelParam(config, "mlMongoDatabase"),
+//      surveyCollection = getConfigModelParam(config, "surveyCollection"),
+//      mlReportPath = getConfigModelParam(config, "mlReportPath"),
+//      surveyQuestionReportColumnsConfig = getConfigModelParam(config, "surveyQuestionReportColumnsConfig"),
+//      surveyStatusReportColumnsConfig = getConfigModelParam(config, "surveyStatusReportColumnsConfig"),
 
       // comms-console
       commsConsolePrarambhEmailSuffix = getConfigModelParam(config, "commsConsolePrarambhEmailSuffix", ".kb@karmayogi.in"),
@@ -780,23 +780,23 @@ object DashboardUtil extends Serializable {
     renamedDF
   }
 
-  def mongodbSolutionsTableAsDataFrame(url: String, mongoDatabase: String, collection: String, solutionIdsDF: DataFrame)(implicit spark: SparkSession): DataFrame = {
-    val schema = new StructType()
-      .add("_id", StringType, true)
-      .add("endDate", DateType, true)
-    val df = spark.read.schema(schema)
-      .format("com.mongodb.spark.sql.DefaultSource")
-      .option("uri", url)
-      .option("database", mongoDatabase)
-      .option("collection", collection)
-      .load()
-    val cleanedDf = df.withColumn("_id_cleaned", regexp_replace(col("_id"), "[^0-9a-zA-Z]", ""))
-    val solutionIds = solutionIdsDF.select("solutionIds").collect.map(_.getString(0))
-    val filteredDf = cleanedDf.filter(col("_id_cleaned").isin(solutionIds: _*)).select(col("_id").alias("solutionIds"), col("endDate"))
-    filteredDf.show(false)
-    filteredDf
-  }
-
+//  def mongodbSolutionsTableAsDataFrame(url: String, mongoDatabase: String, collection: String, solutionIdsDF: DataFrame)(implicit spark: SparkSession): DataFrame = {
+//    val schema = new StructType()
+//      .add("_id", StringType, true)
+//      .add("endDate", DateType, true)
+//    val df = spark.read.schema(schema)
+//      .format("com.mongodb.spark.sql.DefaultSource")
+//      .option("uri", url)
+//      .option("database", mongoDatabase)
+//      .option("collection", collection)
+//      .load()
+//    val cleanedDf = df.withColumn("_id_cleaned", regexp_replace(col("_id"), "[^0-9a-zA-Z]", ""))
+//    val solutionIds = solutionIdsDF.select("solutionIds").collect.map(_.getString(0))
+//    val filteredDf = cleanedDf.filter(col("_id_cleaned").isin(solutionIds: _*)).select(col("_id").alias("solutionIds"), col("endDate"))
+//    filteredDf.show(false)
+//    filteredDf
+//  }
+//
   def writeToCassandra(data: DataFrame, keyspace: String, table: String)(implicit spark: SparkSession): Unit = {
     data.write.format("org.apache.spark.sql.cassandra")
       .mode("append")
