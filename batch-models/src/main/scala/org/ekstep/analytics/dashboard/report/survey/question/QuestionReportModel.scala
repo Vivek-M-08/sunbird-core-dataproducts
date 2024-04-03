@@ -24,6 +24,7 @@ object QuestionReportModel extends AbsDashboardModel {
 
   def processData(timestamp: Long)(implicit spark: SparkSession, sc: SparkContext, fc: FrameworkContext, conf: DashboardConfig): Unit = {
     val today = getDate()
+    println("hi")
     val surveyQuestionReportColumnsConfig = conf.surveyQuestionReportColumnsConfig
     val mapper = new ObjectMapper().registerModule(DefaultScalaModule)
     val surveyQuestionReportColumnsConfigMap = mapper.readValue(surveyQuestionReportColumnsConfig, classOf[Map[String, String]])
